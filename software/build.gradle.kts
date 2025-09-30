@@ -1,10 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
     kotlin("jvm") version "2.2.20"
     application
+    id("com.gradleup.shadow") version "8.3.8"
     id("org.openjfx.javafxplugin") version "0.0.13" apply false
 }
 
@@ -55,10 +57,24 @@ tasks.test {
     useJUnit()
 }
 
-tasks.jar {
+tasks.withType<ShadowJar> {
+    archiveBaseName.set("rom-reader")
+    archiveClassifier.set("")
     manifest {
         attributes["Main-Class"] = "io.github.kolod.RomReaderKt"
     }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    minimize()
+}
+
+// Configure application plugin to use shadow jar
+tasks.named("distZip") {
+    dependsOn("shadowJar")
+}
+
+tasks.named("distTar") {
+    dependsOn("shadowJar")  
+}
+
+tasks.named("startScripts") {
+    dependsOn("shadowJar")
 }

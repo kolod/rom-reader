@@ -35,7 +35,10 @@ A Kotlin desktop application for reading ROM chips via serial port communication
 # Run the application
 ./gradlew run
 
-# Create a fat JAR
+# Create a fat JAR with all dependencies (recommended)
+./gradlew shadowJar
+
+# Create a standard JAR (requires classpath)
 ./gradlew jar
 ```
 
@@ -48,7 +51,10 @@ gradlew.bat build
 # Run the application
 gradlew.bat run
 
-# Create a fat JAR
+# Create a fat JAR with all dependencies (recommended)
+gradlew.bat shadowJar
+
+# Create a standard JAR (requires classpath)
 gradlew.bat jar
 ```
 
@@ -68,6 +74,26 @@ gradlew.bat jar
    - Select a HEX file containing expected data
    - Click "VERIFY" to read ROM data and compare with the file
    - Differences will be highlighted in the hex viewer
+
+## Deployment
+
+### Fat JAR (Recommended)
+The application uses the Shadow JAR plugin to create a self-contained executable JAR:
+
+```bash
+# Build the fat JAR
+./gradlew shadowJar
+
+# The JAR will be created in build/libs/
+# Run with: java -jar build/libs/rom-reader-<version>.jar
+```
+
+**Benefits of Shadow JAR:**
+- ✅ All dependencies included in a single JAR file
+- ✅ No classpath configuration required
+- ✅ Easy distribution and deployment
+- ✅ Minimized JAR size (unused classes removed)
+- ✅ Cross-platform compatibility
 
 ## Serial Communication Protocol
 
@@ -116,6 +142,7 @@ src/
 - **jSerialComm**: Serial port communication library
 - **FlatLaf**: Modern look and feel
 - **Log4j2**: Logging framework
+- **Shadow JAR**: Fat JAR creation plugin
 - **JUnit**: Testing framework
 
 ## License
