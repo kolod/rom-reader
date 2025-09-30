@@ -29,9 +29,9 @@ dependencies {
     implementation("com.formdev:flatlaf-extras:3.6.1")
     
     // Logging
-    implementation("org.apache.logging.log4j:log4j-core:2.20.0")
-    implementation("org.apache.logging.log4j:log4j-api:2.20.0")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+    implementation("org.apache.logging.log4j:log4j-core:2.25.2")
+    implementation("org.apache.logging.log4j:log4j-api:2.25.2")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.25.2")
     
     // Testing
     testImplementation("org.jetbrains.kotlin:kotlin-test")
