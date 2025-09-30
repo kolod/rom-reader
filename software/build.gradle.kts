@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     kotlin("jvm") version "2.2.20"
@@ -7,7 +9,7 @@ plugins {
 }
 
 group = "io.github.kolod"
-version = "1.0.0"
+version = SimpleDateFormat("yy.M.d").format(Date())
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
