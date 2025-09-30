@@ -62,6 +62,11 @@ tasks.withType<ShadowJar> {
     archiveClassifier.set("")
     manifest {
         attributes["Main-Class"] = "io.github.kolod.RomReaderKt"
+        attributes["Implementation-Title"] = "RomReader"
+        attributes["Author"] = "Oleksandr Kolodkin"
+        attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
+        attributes["Multi-Release"] = "true"
+        attributes["Build-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
     }
     minimize()
 }
