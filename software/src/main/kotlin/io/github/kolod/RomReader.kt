@@ -36,7 +36,6 @@ class RomReaderApp : JFrame() {
     private var selectedFile: File? = null
     
     init {
-        setupLookAndFeel()
         initializeComponents()
         setupLayout()
         setupEventHandlers()
@@ -48,14 +47,7 @@ class RomReaderApp : JFrame() {
         setLocationRelativeTo(null)
     }
     
-    private fun setupLookAndFeel() {
-        try {
-            FlatLightLaf.setup()
-        } catch (e: Exception) {
-            logger.warn("Failed to setup FlatLaf, using system look and feel", e)
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-        }
-    }
+
     
     private fun initializeComponents() {
         // File selection components
@@ -523,13 +515,44 @@ class RomReaderApp : JFrame() {
 }
 
 fun main() {
+    // Set system properties for Log4j2
+    System.setProperty("log4j2.configurationFile", "log4j2.xml")
+    System.setProperty("log4j.skipJansi", "false")
+    
     SwingUtilities.invokeLater {
         try {
+            // Setup Look and Feel before creating any components
+            setupLookAndFeel()
             val app = RomReaderApp()
             app.isVisible = true
         } catch (e: Exception) {
             e.printStackTrace()
+            // Use system error stream in case logging isn't working
+            System.err.println("Failed to start application: ${e.message}")
             JOptionPane.showMessageDialog(null, "Failed to start application: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+}
+
+private fun setupLookAndFeel() {
+    try {
+        // Ensure Look and Feel is set up properly
+        System.setProperty("flatlaf.useWindowDecorations", "false")
+        System.setProperty("flatlaf.menuBarEmbedded", "false")
+        
+        // Install FlatLaf
+        FlatLightLaf.setup()
+        
+        // Verify the Look and Feel was set
+        println("Current Look and Feel: ${UIManager.getLookAndFeel()?.name}")
+        
+    } catch (e: Exception) {
+        System.err.println("Failed to setup FlatLaf: ${e.message}")
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+            println("Fallback to system Look and Feel: ${UIManager.getLookAndFeel()?.name}")
+        } catch (fallbackException: Exception) {
+            System.err.println("Failed to set system look and feel: ${fallbackException.message}")
         }
     }
 }

@@ -68,7 +68,18 @@ tasks.withType<ShadowJar> {
         attributes["Multi-Release"] = "true"
         attributes["Build-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
     }
-    minimize()
+    
+    // Merge service files properly
+    mergeServiceFiles()
+    
+    // Append license files instead of failing on duplicates
+    append("META-INF/LICENSE")
+    append("META-INF/LICENSE.txt")
+    append("META-INF/NOTICE")
+    append("META-INF/NOTICE.txt")
+    
+    // Transform Log4j2 plugin cache files - ensure plugins are available at runtime
+    transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer())
 }
 
 // Configure application plugin to use shadow jar
@@ -82,4 +93,18 @@ tasks.named("distTar") {
 
 tasks.named("startScripts") {
     dependsOn("shadowJar")
+}
+
+// Fix task dependencies for shadow jar related tasks
+tasks.named("startShadowScripts") {
+    dependsOn("shadowJar")
+}
+
+// Task to run the shadow JAR for testing
+tasks.register<JavaExec>("runJar") {
+    dependsOn("shadowJar")
+    group = "application"
+    description = "Run the shadow JAR"
+    classpath = files(tasks.shadowJar.get().archiveFile)
+    mainClass.set("io.github.kolod.RomReaderKt")
 }
