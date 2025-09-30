@@ -25,8 +25,8 @@ dependencies {
     implementation("com.fazecast:jSerialComm:2.9.3")
     
     // FlatLaf Look and Feel
-    implementation("com.formdev:flatlaf:3.2.5")
-    implementation("com.formdev:flatlaf-extras:3.2.5")
+    implementation("com.formdev:flatlaf:3.6.1")
+    implementation("com.formdev:flatlaf-extras:3.6.1")
     
     // Logging
     implementation("org.apache.logging.log4j:log4j-core:2.20.0")
