@@ -3,16 +3,19 @@
 #include "stdint.h"
 #include "stdbool.h"
 
+
+// Helper macros for stringification
+#define STR(x) #x
+#define XSTR(x) STR(x)
+
 // Pins
-
-// SPI pins
-#define PIN_SPI_SS    53 // PB0
-#define PIN_SPI_SCK   52 // PB1
-#define PIN_SPI_MOSI  51 // PB2
-#define PIN_SPI_MISO  50 // PB3
-
-// Internal LED pin
-#define PIN_LED       13 // PB7
+// Print previous SPI pin declarations at compile time using defines
+#pragma message("SPI pin declarations:")
+#pragma message("PIN_SPI_SS    "  XSTR(PIN_SPI_SS))
+#pragma message("PIN_SPI_SCK   "  XSTR(PIN_SPI_SCK))
+#pragma message("PIN_SPI_MOSI  "  XSTR(PIN_SPI_MOSI))
+#pragma message("PIN_SPI_MISO  "  XSTR(PIN_SPI_MISO))
+#pragma message("PIN_SPI_MOSI2 "  XSTR(LED_BUILTIN))
 
 // uPD2764D pins
 #define ROM_D0       22  // PA0
