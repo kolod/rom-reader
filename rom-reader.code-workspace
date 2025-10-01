@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "software"
+		},
+		{
+			"path": "firmware"
+		},
+		{
+			"path": ".github"
+		},
+		{
+			"path": "doc"
+		}
+	],
+	"settings": {}
+}

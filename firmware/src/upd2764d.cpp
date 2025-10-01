@@ -105,7 +105,9 @@ void print_rom_contents() {
         checksum = 0x10;
 
         // Address
+        if (((address >> 8) & 0xFF) < 0x10) Serial.print('0');
         Serial.print((address >> 8) & 0xFF, HEX);
+        if ((address & 0xFF) < 0x10) Serial.print('0');
         Serial.print(address & 0xFF, HEX);
         checksum += (address >> 8) & 0xFF;
         checksum += address & 0xFF;
