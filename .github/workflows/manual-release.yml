@@ -1,0 +1,149 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+      draft:
+        description: 'Create as draft'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # Build everything first
+  build-all:
+    name: Build All Components
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: 8
+        distribution: 'temurin'
+    
+    - name: Cache PlatformIO
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.platformio
+          ~/.cache/pip
+        key: ${{ runner.os }}-platformio-${{ hashFiles('firmware/platformio.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-platformio-
+    
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('software/**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install platformio
+    
+    - name: Grant execute permission for gradlew (Unix)
+      if: runner.os != 'Windows'
+      run: chmod +x software/gradlew
+    
+    - name: Build firmware
+      working-directory: firmware
+      run: platformio run
+    
+    - name: Build software
+      working-directory: software
+      run: |
+        ${{ runner.os == 'Windows' && '.\gradlew.bat' || './gradlew' }} build test shadowJar
+    
+    - name: Upload firmware artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware-${{ matrix.os }}
+        path: |
+          firmware/.pio/build/megaatmega2560/firmware.hex
+          firmware/.pio/build/megaatmega2560/firmware.elf
+        retention-days: 1
+    
+    - name: Upload software artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: software-${{ matrix.os }}
+        path: software/build/libs/*.jar
+        retention-days: 1
+
+  # Create the release
+  create-release:
+    name: Create Release
+    needs: build-all
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Prepare release files
+      run: |
+        mkdir -p release
+        VERSION="${{ github.event.inputs.version }}"
+        
+        # Copy software JAR (from Ubuntu build)
+        find artifacts -name "*.jar" -path "*/software-ubuntu-latest/*" -exec cp {} release/rom-reader-${VERSION}.jar \; || echo "Software JAR not found"
+        
+        # Copy firmware HEX (from Ubuntu build)  
+        find artifacts -name "firmware.hex" -path "*/firmware-ubuntu-latest/*" -exec cp {} release/rom-reader-firmware-${VERSION}.hex \; || echo "Firmware HEX not found"
+        
+        # Also copy Windows builds for completeness
+        find artifacts -name "*.jar" -path "*/software-windows-latest/*" -exec cp {} release/rom-reader-${VERSION}-windows.jar \; || echo "Windows Software JAR not found"
+        find artifacts -name "firmware.hex" -path "*/firmware-windows-latest/*" -exec cp {} release/rom-reader-firmware-${VERSION}-windows.hex \; || echo "Windows Firmware HEX not found"
+        
+        ls -la release/
+    
+    - name: Create and push tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+        git push origin ${{ github.event.inputs.version }}
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.event.inputs.version }}
+        name: Release ${{ github.event.inputs.version }}
+        files: release/*
+        generate_release_notes: true
+        draft: ${{ github.event.inputs.draft }}
+        prerelease: ${{ github.event.inputs.prerelease }}
+        fail_on_unmatched_files: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
