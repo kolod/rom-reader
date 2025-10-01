@@ -60,6 +60,11 @@ tasks.test {
 tasks.withType<ShadowJar> {
     archiveBaseName.set("rom-reader")
     archiveClassifier.set("")
+    archiveVersion.set("")
+
+    // Ensure proper dependency on jar task
+    dependsOn(tasks.jar)
+
     manifest {
         attributes["Main-Class"] = "io.github.kolod.RomReaderKt"
         attributes["Implementation-Title"] = "RomReader"
